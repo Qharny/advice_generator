@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advice Generator</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            position: relative;
+            max-width: 540px;
+            width: 100%;
+        }
+        
+        .advice-card {
+            background: #313a49;
+            border-radius: 20px;
+            padding: 50px 40px 70px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .advice-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4);
+        }
+        
+        .advice-number {
+            color: #52ffa8;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 32px;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        
+        .advice-text {
+            color: #cee3e9;
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1.4;
+            quotes: '"' '"';
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease 0.2s forwards;
+        }
+        
+        .advice-text::before {
+            content: open-quote;
+        }
+        
+        .advice-text::after {
+            content: close-quote;
+        }
+        
+        .divider {
+            margin: 40px 0;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease 0.4s forwards;
+        }
+        
+        .divider svg {
+            width: 100%;
+            height: auto;
+        }
+        
+        .dice-button {
+            position: absolute;
+            bottom: -32px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 64px;
+            height: 64px;
+            background: #52ffa8;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(82, 255, 168, 0.3);
+            opacity: 0;
+            animation: fadeInScale 0.6s ease 0.6s forwards;
+        }
+        
+        .dice-button:hover {
+            background: #42e695;
+            transform: translateX(-50%) scale(1.1);
+            box-shadow: 0 15px 30px rgba(82, 255, 168, 0.5);
+        }
+        
+        .dice-button:active {
+            transform: translateX(-50%) scale(0.95);
+        }
+        
+        .dice-button.loading {
+            animation: spin 1s linear infinite;
+        }
+        
+        .dice-icon {
+            width: 24px;
+            height: 24px;
+            fill: #313a49;
+            transition: transform 0.3s ease;
+        }
+        
+        .dice-button:hover .dice-icon {
+            transform: rotate(15deg);
+        }
+        
+        .loading-spinner {
+            display: none;
+            width: 24px;
+            height: 24px;
+            border: 3px solid #313a49;
+            border-top: 3px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .dice-button.loading .dice-icon {
+            display: none;
+        }
+        
+        .dice-button.loading .loading-spinner {
+            display: block;
+        }
+        
+        .error-message {
+            color: #ff6b6b;
+            font-size: 16px;
+            margin-top: 20px;
+            display: none;
+            opacity: 0;
+            animation: fadeIn 0.3s ease forwards;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .advice-card {
+                padding: 40px 30px 60px;
+            }
+            
+            .advice-text {
+                font-size: 24px;
+            }
+            
+            .advice-number {
+                font-size: 12px;
+                letter-spacing: 3px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 10px;
+            }
+            
+            .advice-card {
+                padding: 35px 25px 55px;
+            }
+            
+            .advice-text {
+                font-size: 20px;
+            }
+            
+            .dice-button {
+                width: 56px;
+                height: 56px;
+                bottom: -28px;
+            }
+            
+            .dice-icon {
+                width: 20px;
+                height: 20px;
+            }
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) scale(1);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* Content update animation */
+        .advice-card.updating .advice-number,
+        .advice-card.updating .advice-text {
+            animation: fadeOut 0.3s ease forwards;
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
+        
+        /* Glowing effect on load */
+        .advice-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #52ffa8, transparent, #52ffa8);
+            border-radius: 22px;
+            z-index: -1;
+            opacity: 0;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            0% {
+                opacity: 0;
+            }
+            50% {
+                opacity: 0.1;
+            }
+            100% {
+                opacity: 0.2;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="advice-card" id="adviceCard">
+            <div class="advice-number" id="adviceNumber">Advice #117</div>
+            <div class="advice-text" id="adviceText">It is easy to sit up and take notice, what's difficult is getting up and taking action.</div>
+            
+            <div class="divider">
+                <svg width="444" height="16" xmlns="http://www.w3.org/2000/svg">
+                    <g fill="none" fill-rule="evenodd">
+                        <path fill="#4F5D74" d="M0 8h196v1H0zM248 8h196v1H248z"/>
+                        <g transform="translate(212)" fill="#CEE3E9">
+                            <rect width="6" height="16" rx="3"/>
+                            <rect x="14" width="6" height="16" rx="3"/>
+                        </g>
+                    </g>
+                </svg>
+            </div>
+            
+            <button class="dice-button" id="diceButton" aria-label="Get new advice">
+                <svg class="dice-icon" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="m20 0 4 4v16l-4 4H4L0 20V4L4 0h16Zm-4 4H8L4 8v8l4 4h8l4-4V8l-4-4ZM8 8h2v2H8V8Zm6 0h2v2h-2V8Zm-3 3h2v2h-2v-2Zm-3 3h2v2H8v-2Zm6 0h2v2h-2v-2Z"/>
+                </svg>
+                <div class="loading-spinner"></div>
+            </button>
+            
+            <div class="error-message" id="errorMessage">
+                Sorry, couldn't fetch new advice. Please try again!
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AdviceGenerator {
+            constructor() {
+                this.adviceCard = document.getElementById('adviceCard');
+                this.adviceNumber = document.getElementById('adviceNumber');
+                this.adviceText = document.getElementById('adviceText');
+                this.diceButton = document.getElementById('diceButton');
+                this.errorMessage = document.getElementById('errorMessage');
+                
+                this.isLoading = false;
+                this.init();
+            }
+            
+            init() {
+                this.diceButton.addEventListener('click', () => this.getNewAdvice());
+                
+                // Load initial advice
+                setTimeout(() => {
+                    this.getNewAdvice();
+                }, 1000);
+            }
+            
+            async getNewAdvice() {
+                if (this.isLoading) return;
+                
+                this.setLoadingState(true);
+                this.hideError();
+                
+                try {
+                    // Add a small delay for better UX
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    const response = await fetch('https://api.adviceslip.com/advice', {
+                        cache: 'no-cache'
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data && data.slip) {
+                        await this.updateAdvice(data.slip);
+                    } else {
+                        throw new Error('Invalid response format');
+                    }
+                    
+                } catch (error) {
+                    console.error('Error fetching advice:', error);
+                    this.showError();
+                } finally {
+                    this.setLoadingState(false);
+                }
+            }
+            
+            async updateAdvice(slip) {
+                // Add updating class for animation
+                this.adviceCard.classList.add('updating');
+                
+                // Wait for fade out animation
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                // Update content
+                this.adviceNumber.textContent = `Advice #${slip.id}`;
+                this.adviceText.textContent = slip.advice;
+                
+                // Remove updating class and trigger fade in
+                this.adviceCard.classList.remove('updating');
+                
+                // Reset animations
+                this.adviceNumber.style.animation = 'none';
+                this.adviceText.style.animation = 'none';
+                
+                // Trigger reflow
+                this.adviceNumber.offsetHeight;
+                this.adviceText.offsetHeight;
+                
+                // Restart animations
+                this.adviceNumber.style.animation = 'fadeInUp 0.6s ease forwards';
+                this.adviceText.style.animation = 'fadeInUp 0.6s ease 0.2s forwards';
+            }
+            
+            setLoadingState(loading) {
+                this.isLoading = loading;
+                
+                if (loading) {
+                    this.diceButton.classList.add('loading');
+                    this.diceButton.disabled = true;
+                } else {
+                    this.diceButton.classList.remove('loading');
+                    this.diceButton.disabled = false;
+                }
+            }
+            
+            showError() {
+                this.errorMessage.style.display = 'block';
+                setTimeout(() => {
+                    this.errorMessage.style.animation = 'fadeIn 0.3s ease forwards';
+                }, 10);
+            }
+            
+            hideError() {
+                this.errorMessage.style.display = 'none';
+                this.errorMessage.style.animation = 'none';
+            }
+        }
+        
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new AdviceGenerator();
+        });
+        
+        // Add some nice effects
+        document.addEventListener('mousemove', (e) => {
+            const card = document.querySelector('.advice-card');
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const rotateX = (y - centerY) / 20;
+            const rotateY = (centerX - x) / 20;
+            
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(0)`;
+        });
+        
+        document.addEventListener('mouseleave', () => {
+            const card = document.querySelector('.advice-card');
+            card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateZ(0)';
+        });
+    </script>
+</body>
+</html>
